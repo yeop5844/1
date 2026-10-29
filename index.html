@@ -1,172 +1,284 @@
-<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#111827">
-<title>음악 수행평가</title>
-<style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--panel2:#1b2740;--text:#f5f7ff;--muted:#a9b4cc;--accent:#a78bfa;--accent2:#67e8f9;--good:#6ee7b7;--bad:#fda4af;--line:#303b56}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1a2340 0%,var(--bg) 58%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
-main{max-width:900px;margin:auto;padding:22px 16px 48px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.logo{font-size:13px;letter-spacing:.14em;color:var(--accent2);font-weight:800}.tag{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--muted)}
-h1{font-size:clamp(30px,6vw,48px);line-height:1.06;margin:22px 0 10px;letter-spacing:-.04em}.lead{color:var(--muted);line-height:1.6;margin:0 0 24px}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.tab,button{font:inherit;cursor:pointer;border:1px solid var(--line);border-radius:13px;padding:12px 14px;background:var(--panel2);color:var(--text);font-weight:700}.tab.active,button.primary{background:var(--accent);border-color:var(--accent);color:#17112a}.tab{font-size:14px}.panel{background:rgba(21,29,49,.92);border:1px solid var(--line);border-radius:22px;padding:clamp(16px,4vw,26px);box-shadow:0 18px 55px #0002}
-.eyebrow{font-size:12px;color:var(--accent2);font-weight:800;letter-spacing:.12em;text-transform:uppercase}.qtop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 18px}.counter{color:var(--muted);font-size:13px}.playerbox{border:1px dashed #56627e;background:#10182b;border-radius:16px;padding:14px;margin:16px 0}.playerbox p{margin:0 0 10px;color:var(--muted);font-size:14px}.video{width:100%;aspect-ratio:16/9;max-height:380px;border:0;border-radius:10px;background:#070b14}.no-video{display:grid;place-items:center;text-align:center;min-height:150px;padding:20px;color:var(--muted);line-height:1.6}
-.fields{display:grid;grid-template-columns:1fr;gap:12px}.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:7px}.field input,.settings input{width:100%;padding:14px 13px;border:1px solid var(--line);border-radius:12px;background:#0c1426;color:var(--text);font-size:16px;outline:none}.field input:focus,.settings input:focus{border-color:var(--accent)}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.actions button{flex:1;min-width:120px}.secondary{background:transparent}.feedback{margin-top:16px;padding:14px;border-radius:13px;line-height:1.55;display:none}.feedback.good{display:block;background:#0c302b;border:1px solid #176d5c}.feedback.bad{display:block;background:#351923;border:1px solid #81394b}.answerline{color:var(--muted);font-size:14px;margin-top:7px}
-.progress{height:6px;background:#28334c;border-radius:999px;overflow:hidden;margin:0 0 18px}.progress span{height:100%;display:block;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .25s}
-.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}.stat{background:#0e1629;border:1px solid var(--line);border-radius:14px;padding:13px}.stat small{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:22px;margin-top:4px}
-.hidden{display:none!important}.list{display:grid;gap:10px}.songcard{background:#10182b;border:1px solid var(--line);border-radius:14px;padding:14px}.songtitle{font-weight:800;margin-bottom:5px}.songmeta{font-size:14px;color:var(--muted);line-height:1.6}.songcard button{margin-top:10px;font-size:13px;padding:9px 11px}
-details{margin-top:16px;border:1px solid var(--line);border-radius:15px;padding:14px;background:#10182b}summary{cursor:pointer;font-weight:800} .settings{display:grid;gap:14px;margin-top:14px}.settingrow{display:grid;grid-template-columns:1fr;gap:6px}.settingrow label{font-size:13px;color:var(--muted)}.hint{font-size:12px;color:var(--muted);line-height:1.6}.pill{display:inline-block;background:#293451;color:#dbe4ff;padding:5px 8px;border-radius:8px;font-size:12px;margin-right:5px}
-footer{color:var(--muted);font-size:12px;line-height:1.7;margin-top:22px}
-@media(min-width:650px){.fields{grid-template-columns:1fr 1fr}.settingrow{grid-template-columns:180px 1fr;align-items:center}.panel{padding:26px}}
-</style>
-</head>
-<body>
-<main>
-  <div class="top"><div class="logo">LISTEN · RECALL · MASTER</div><div class="tag">MUSIC PERFORMANCE TRAINER</div></div>
-  <h1>음악<br><span style="color:var(--accent)">수행 평가</span></h1>
-  <p class="lead">음악을 듣고 오페라 제목 · 아리아 곡명 · 작곡가를 맞혀 보세요.<br>다섯 곡을 실전처럼 익히고, 틀린 곡은 다시 연습합니다.</p>
+from pathlib import Path
+import zipfile, re, shutil, os
 
-  <div class="tabs" role="tablist">
+src = Path("/mnt/data/opera_ear_trainer_fixed_v2/index.html")
+if not src.exists():
+    # Try the earlier base folder if present
+    candidates = [
+        Path("/mnt/data/opera_ear_trainer/index.html"),
+        Path("/mnt/data/index.html"),
+    ]
+    src = next((p for p in candidates if p.exists()), None)
+
+if src is None:
+    raise FileNotFoundError("기존 오페라 귀 실험실 index.html 파일을 찾을 수 없습니다.")
+
+html = src.read_text(encoding="utf-8")
+
+# Ensure new tabs are present only once
+old_tabs = '''  <div class="tabs" role="tablist">
     <button class="tab active" data-mode="exam">실전 시험</button>
     <button class="tab" data-mode="wrong">오답 반복</button>
     <button class="tab" data-mode="study">암기 모드</button>
-  </div>
+  </div>'''
+new_tabs = '''  <div class="tabs" role="tablist">
+    <button class="tab active" data-mode="exam">실전 시험</button>
+    <button class="tab" data-mode="wrong">오답 반복</button>
+    <button class="tab" data-mode="study">암기 모드</button>
+    <button class="tab" data-mode="record">기록 측정</button>
+    <button class="tab" data-mode="ranking">순위</button>
+  </div>'''
+if old_tabs in html:
+    html = html.replace(old_tabs, new_tabs, 1)
+elif 'data-mode="record"' not in html:
+    raise RuntimeError("기존 메뉴 구조를 찾지 못했습니다. 파일 구조가 예상과 다릅니다.")
 
-  <section id="examPanel" class="panel">
-    <div class="qtop"><span class="eyebrow" id="modeLabel">EXAM MODE</span><span class="counter" id="counter">문제 1 / 5</span></div>
-    <div class="progress"><span id="progressBar"></span></div>
-    <div class="statrow">
-      <div class="stat"><small>현재 점수</small><strong id="score">0</strong></div>
-      <div class="stat"><small>정답</small><strong id="correctCount">0</strong></div>
-      <div class="stat"><small>오답 목록</small><strong id="wrongCount">0</strong></div>
+# Add CSS if not already present
+if ".timerBig" not in html:
+    html = html.replace(
+        '.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}',
+        '.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:18px 0}'
+    )
+    html = html.replace(
+        '.hidden{display:none!important}.list{display:grid;gap:10px}',
+        '.hidden{display:none!important}.list{display:grid;gap:10px}.timerBig{font-size:clamp(34px,8vw,54px);font-weight:900;letter-spacing:-.04em;text-align:center;font-variant-numeric:tabular-nums;margin:8px 0}.rankRow{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;background:#10182b;border:1px solid var(--line);border-radius:13px;padding:12px}.rankNum{font-weight:900;color:var(--accent2)}.rankName{font-weight:800;overflow-wrap:anywhere}.rankTime{font-weight:800;font-variant-numeric:tabular-nums}.notice{background:#2b2414;border:1px solid #66552a;border-radius:12px;padding:12px;color:#f7e6b0;font-size:13px;line-height:1.6}'
+    )
+    html = html.replace(
+        '@media(min-width:650px){.fields{grid-template-columns:1fr 1fr}.settingrow{grid-template-columns:180px 1fr;align-items:center}.panel{padding:26px}}',
+        '@media(max-width:600px){.tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.tab{padding:10px 6px;font-size:12px}}@media(min-width:650px){.fields{grid-template-columns:1fr 1fr}.settingrow{grid-template-columns:180px 1fr;align-items:center}.panel{padding:26px}}'
+    )
+
+# Add panels if absent
+if 'id="recordPanel"' not in html:
+    panels = '''
+  <section id="recordPanel" class="panel hidden">
+    <div class="qtop"><span class="eyebrow">TIME ATTACK</span><span class="counter" id="recordCounter">준비 완료</span></div>
+    <div class="stat"><small>현재 측정 시간</small><div class="timerBig" id="recordTimer">00.00초</div></div>
+    <div id="nicknameGate">
+      <h2>닉네임 만들기</h2>
+      <p class="lead">기록 측정과 순위표에 표시할 닉네임을 정해 주세요. 같은 브라우저에서는 다음 방문에도 유지됩니다.</p>
+      <div class="field"><label for="nicknameInput">닉네임 (2~16자)</label><input id="nicknameInput" maxlength="16" autocomplete="nickname" placeholder="예: 오페라왕"></div>
+      <div class="actions"><button class="primary" id="saveNicknameBtn">닉네임 만들고 입장</button></div>
+      <div id="nicknameError" class="feedback bad"></div>
     </div>
-    <div class="playerbox">
-      <p>🎧 아래 플레이어에서 음악을 재생해 보세요. 영상이 준비되지 않았다면 설정에서 음원 링크를 등록하세요.</p>
-      <div id="playerArea" class="no-video">아직 이 곡의 유튜브 링크가 등록되지 않았습니다.<br>아래 ‘음원 설정’을 열어 링크를 넣어 주세요.</div>
-      <div class="actions" style="margin-top:10px">
-        <button class="secondary" id="searchBtn">유튜브에서 음원 찾기 ↗</button>
-        <button class="secondary" id="revealBtn">정답 살짝 보기</button>
+    <div id="recordLobby" class="hidden">
+      <p>참가자: <strong id="activeNickname"></strong></p>
+      <p class="hint">5곡을 정해진 순서대로 풀어 주세요. 정답을 모두 맞혀야 기록이 등록됩니다. 오답을 입력해도 시간은 계속 흐릅니다.</p>
+      <div class="actions"><button class="primary" id="startRecordBtn">측정 시작</button><button class="secondary" id="changeNicknameBtn">닉네임 변경</button></div>
+    </div>
+    <div id="recordQuiz" class="hidden">
+      <div class="progress"><span id="recordProgressBar"></span></div>
+      <div class="playerbox">
+        <p>🎧 음악을 듣고 아래 세 항목을 모두 맞혀 주세요.</p>
+        <div id="recordPlayerArea" class="no-video">음원 불러오는 중…</div>
       </div>
-      <div id="studyAnswer" class="feedback good"></div>
+      <div class="fields">
+        <div class="field"><label for="recordOpera">① 오페라 제목</label><input id="recordOpera" autocomplete="off" placeholder="오페라 제목 입력"></div>
+        <div class="field"><label for="recordAria">② 아리아 곡명</label><input id="recordAria" autocomplete="off" placeholder="아리아 곡명 입력"></div>
+        <div class="field"><label for="recordComposer">③ 작곡가</label><input id="recordComposer" autocomplete="off" placeholder="작곡가 이름 입력"></div>
+      </div>
+      <div class="actions"><button class="primary" id="recordSubmitBtn">정답 제출</button></div>
+      <div id="recordFeedback" class="feedback"></div>
     </div>
-    <div id="answerFields" class="fields">
-      <div class="field"><label for="opera">① 오페라 제목</label><input id="opera" autocomplete="off" placeholder="오페라 제목 입력"></div>
-      <div class="field"><label for="aria">② 아리아 곡명</label><input id="aria" autocomplete="off" placeholder="아리아 곡명 입력"></div>
-      <div class="field"><label for="composer">③ 작곡가</label><input id="composer" autocomplete="off" placeholder="작곡가 이름 입력"></div>
+    <div id="recordFinished" class="hidden">
+      <h2>기록 등록 완료!</h2>
+      <p>5곡을 모두 맞혔습니다.</p>
+      <div class="stat"><small>최종 기록</small><div class="timerBig" id="finalRecordTime">00.00초</div></div>
+      <p class="hint" id="recordFinishNote"></p>
+      <div class="actions"><button class="primary" id="recordAgainBtn">다시 도전</button><button class="secondary" id="goRankingBtn">순위 확인</button></div>
     </div>
-    <div class="actions" id="answerActions">
-      <button class="primary" id="submitBtn">정답 제출</button>
-      <button class="secondary" id="skipBtn">모르겠어요</button>
-    </div>
-    <div id="feedback" class="feedback"></div>
-    <div class="actions hidden" id="nextActions"><button class="primary" id="nextBtn">다음 문제 →</button></div>
-    <div id="finish" class="hidden">
-      <h2>연습 완료!</h2><p id="finishText"></p>
-      <div class="actions"><button class="primary" id="restartBtn">다시 풀기</button><button class="secondary" id="wrongStartBtn">오답만 풀기</button></div>
-    </div>
+    <p class="notice">현재 버전은 기록을 이 브라우저에만 저장합니다. 다른 사람과 공유하는 온라인 전체 순위는 데이터베이스 연결이 필요합니다.</p>
   </section>
 
-  <details hidden>
-    <summary>⚙️ 음원 설정 — 유튜브 링크 등록</summary>
-    <p class="hint">곡마다 유튜브 영상 주소를 붙여 넣고 저장하세요. 링크는 이 브라우저에만 저장됩니다. 유튜브에서 임베드가 허용되지 않은 영상은 재생되지 않을 수 있습니다.</p>
-    <div class="settings" id="settingsList"></div>
-    <div class="actions"><button class="primary" id="saveLinks">링크 저장하기</button><button class="secondary" id="clearLinks">링크 지우기</button></div>
-    <p class="hint">유튜브 검색은 새 탭에서 열립니다. 영상 링크 예시: https://www.youtube.com/watch?v=VIDEO_ID 또는 https://youtu.be/VIDEO_ID</p>
-  </details>
-
-  <section style="margin-top:16px">
-    <div class="qtop"><span class="eyebrow">YOUR REPERTOIRE</span><span class="counter">총 5곡</span></div>
-    <div class="list" id="songList"></div>
+  <section id="rankingPanel" class="panel hidden">
+    <div class="qtop"><span class="eyebrow">LEADERBOARD</span><span class="counter">개인 최고 기록</span></div>
+    <h2>🏆 순위</h2>
+    <p class="hint">닉네임별 가장 빠른 완주 기록을 표시합니다. 현재는 이 브라우저에 저장된 기록만 보입니다.</p>
+    <div id="rankingList" class="list"></div>
+    <div id="emptyRanking" class="hint">아직 등록된 기록이 없습니다. 기록 측정에 도전해 보세요!</div>
+    <div class="actions"><button class="primary" id="rankingStartBtn">기록 측정으로 이동</button></div>
   </section>
-  <footer>사용 팁: 링크를 저장한 뒤 실전 시험을 시작하세요. 시험 모드에서는 세 항목을 모두 맞혀야 정답으로 처리합니다. 표기 차이(띄어쓰기·일부 괄호)는 자동으로 정리해 비교합니다. 진행 상황은 이 기기의 브라우저에 저장되지 않으므로 새로고침하면 현재 시험은 초기화됩니다.</footer>
-</main>
-<script>
-const songs = [
- {opera:"투란도트", aria:"네순도르마 (공주는 잠 못 이루고)", composer:"푸치니", aliases:{opera:["투란도트","투란도트 오페라"],aria:["네순도르마","공주는 잠 못 이루고","공주는잠못이루고","nessun dorma"],composer:["푸치니","자코모 푸치니","푸치니 작곡"]}, search:"투란도트 네순도르마 푸치니 아리아"},
- {opera:"카르멘", aria:"투우사의 노래", composer:"비제", aliases:{opera:["카르멘"],aria:["투우사의 노래","투우사의노래","투우사의 아리아","Votre toast"],composer:["비제","조르주 비제","비제 작곡"]}, search:"카르멘 투우사의 노래 비제 아리아"},
- {opera:"카르멘", aria:"하바네라", composer:"비제", aliases:{opera:["카르멘"],aria:["하바네라","하바네라 아리아","Habanera"],composer:["비제","조르주 비제","비제 작곡"]}, search:"카르멘 하바네라 비제 아리아"},
- {opera:"리골레토", aria:"여자의 마음", composer:"베르디", aliases:{opera:["리골레토"],aria:["여자의 마음","여자의마음","La donna è mobile","라 돈나 에 모빌레"],composer:["베르디","주세페 베르디","베르디 작곡"]}, search:"리골레토 여자의 마음 베르디 아리아"},
- {opera:"마술피리", aria:"밤의 여왕 아리아", composer:"모차르트", aliases:{opera:["마술피리","마술 피리"],aria:["밤의 여왕 아리아","밤의여왕 아리아","밤의여왕아리아","밤의 여왕의 아리아","Der Hölle Rache","지옥의 복수심이 내 마음에 끓어오르고"],composer:["모차르트","모짜르트","볼프강 아마데우스 모차르트","모차르트 작곡"]}, search:"마술피리 밤의 여왕 아리아 모차르트"}
-];
-const $ = id => document.getElementById(id);
-let mode="exam", order=[], pos=0, locked=false, score=0, correct=0, wrongSet=new Set(), revealed=false;
-// 사용자가 제공한 유튜브 링크를 곡별로 미리 등록합니다.
-const links = {
-  0: "https://youtu.be/cWc7vYjgnTs?si=LpVbg6eZ6CLRqvX4",
-  1: "https://youtu.be/e5qmSEvDEGs?si=xlqDIjFO4_2n5LmV",
-  2: "https://youtu.be/K2snTkaD64U?si=AfEL5T1JuxXW4pbK",
-  3: "https://youtu.be/a8-vZJNY10k?si=uhGoJUFB_LiMe7Ku",
-  4: "https://youtu.be/s7vJcUogrEI?si=qyOmzq9QRsYqQojG"
+
+'''
+    # Insert before hidden details settings
+    marker = '  <details hidden>'
+    if marker not in html:
+        raise RuntimeError("기존 설정 영역을 찾지 못해 화면을 안전하게 추가할 수 없습니다.")
+    html = html.replace(marker, panels + marker, 1)
+
+# Add the JS logic once
+if 'RECORDS_KEY = "operaTrainerRecordsV1"' not in html:
+    js = r'''
+// 기록 측정/순위 기능 (현재 브라우저 로컬 저장 버전)
+const RECORDS_KEY = "operaTrainerRecordsV1";
+const NICKNAME_KEY = "operaTrainerNicknameV1";
+let recordPos = 0, recordStartedAt = null, recordTick = null;
+
+function getNickname(){ return (localStorage.getItem(NICKNAME_KEY) || "").trim(); }
+function getRecords(){
+  try { const data = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]"); return Array.isArray(data) ? data : []; }
+  catch(e){ return []; }
+}
+function saveRecords(records){ localStorage.setItem(RECORDS_KEY, JSON.stringify(records)); }
+function formatRecordTime(ms){ return (ms / 1000).toFixed(2) + "초"; }
+function showMainPanel(which){
+  const exam = document.getElementById("examPanel");
+  if(exam) exam.classList.toggle("hidden", which !== "exam");
+  document.getElementById("recordPanel").classList.toggle("hidden", which !== "record");
+  document.getElementById("rankingPanel").classList.toggle("hidden", which !== "ranking");
+  const settings = document.querySelector("details");
+  if(settings) settings.classList.add("hidden");
+}
+function setRecordTabActive(which){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active", b.dataset.mode === which));
+}
+function updateNicknameUI(){
+  const name = getNickname();
+  document.getElementById("nicknameGate").classList.toggle("hidden", !!name);
+  document.getElementById("recordLobby").classList.toggle("hidden", !name);
+  document.getElementById("activeNickname").textContent = name;
+  document.getElementById("nicknameError").textContent = "";
+  document.getElementById("nicknameError").className = "feedback";
+}
+function resetRecordUI(){
+  if(recordTick){ clearInterval(recordTick); recordTick = null; }
+  recordPos = 0; recordStartedAt = null;
+  document.getElementById("recordTimer").textContent = "00.00초";
+  document.getElementById("recordCounter").textContent = "준비 완료";
+  document.getElementById("nicknameGate").classList.add("hidden");
+  document.getElementById("recordLobby").classList.add("hidden");
+  document.getElementById("recordQuiz").classList.add("hidden");
+  document.getElementById("recordFinished").classList.add("hidden");
+  updateNicknameUI();
+}
+function openRecordTab(){
+  showMainPanel("record"); setRecordTabActive("record"); resetRecordUI();
+}
+function openRankingTab(){
+  showMainPanel("ranking"); setRecordTabActive("ranking"); renderRanking();
+}
+function updateRecordTimer(){
+  if(recordStartedAt !== null) document.getElementById("recordTimer").textContent = formatRecordTime(performance.now() - recordStartedAt);
+}
+function renderRecordQuestion(){
+  const song = songs[recordPos];
+  document.getElementById("recordCounter").textContent = `문제 ${recordPos+1} / ${songs.length}`;
+  document.getElementById("recordProgressBar").style.width = (recordPos / songs.length * 100) + "%";
+  ["recordOpera","recordAria","recordComposer"].forEach(id=>document.getElementById(id).value="");
+  const fb = document.getElementById("recordFeedback"); fb.className = "feedback"; fb.textContent = "";
+  const id = videoId(links[recordPos]);
+  const area = document.getElementById("recordPlayerArea");
+  if(id){
+    area.className = "";
+    area.innerHTML = `<iframe class="video" title="기록 측정 음원" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?playsinline=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+  } else { area.className = "no-video"; area.textContent = "이 곡의 음원을 불러올 수 없습니다."; }
+  document.getElementById("recordOpera").focus();
+}
+function startRecord(){
+  recordPos = 0; recordStartedAt = performance.now();
+  document.getElementById("recordLobby").classList.add("hidden");
+  document.getElementById("recordFinished").classList.add("hidden");
+  document.getElementById("recordQuiz").classList.remove("hidden");
+  if(recordTick) clearInterval(recordTick);
+  renderRecordQuestion();
+  recordTick = setInterval(updateRecordTimer, 50);
+}
+function submitRecordAnswer(){
+  if(recordStartedAt === null) return;
+  const song = songs[recordPos];
+  const operaOK = matches(document.getElementById("recordOpera").value, answerSet(song,"opera"));
+  const ariaOK = matches(document.getElementById("recordAria").value, answerSet(song,"aria"));
+  const composerOK = matches(document.getElementById("recordComposer").value, answerSet(song,"composer"));
+  if(operaOK && ariaOK && composerOK){
+    recordPos++;
+    if(recordPos >= songs.length){ finishRecord(); return; }
+    renderRecordQuestion();
+  } else {
+    const fb = document.getElementById("recordFeedback");
+    fb.className = "feedback bad";
+    fb.innerHTML = `아직 정답이 아닙니다. 세 항목을 모두 맞혀야 다음 문제로 넘어갑니다.<div class="answerline">오페라 ${operaOK?"✓":"✗"} · 아리아 ${ariaOK?"✓":"✗"} · 작곡가 ${composerOK?"✓":"✗"}</div>`;
+  }
+}
+function finishRecord(){
+  const elapsed = Math.round(performance.now() - recordStartedAt);
+  if(recordTick){ clearInterval(recordTick); recordTick = null; }
+  recordStartedAt = null;
+  document.getElementById("recordQuiz").classList.add("hidden");
+  document.getElementById("recordFinished").classList.remove("hidden");
+  document.getElementById("recordCounter").textContent = "완주";
+  document.getElementById("recordProgressBar").style.width = "100%";
+  document.getElementById("recordTimer").textContent = formatRecordTime(elapsed);
+  document.getElementById("finalRecordTime").textContent = formatRecordTime(elapsed);
+  const nickname = getNickname();
+  const records = getRecords();
+  records.push({nickname, timeMs: elapsed, date: new Date().toISOString()});
+  saveRecords(records);
+  const personalBest = Math.min(...records.filter(r=>r.nickname === nickname).map(r=>r.timeMs));
+  document.getElementById("recordFinishNote").textContent = personalBest === elapsed ? "개인 최고 기록입니다! 순위 탭에서 확인할 수 있습니다." : `개인 최고 기록은 ${formatRecordTime(personalBest)}입니다. 이번 기록도 저장되었습니다.`;
+}
+function renderRanking(){
+  const bestByName = new Map();
+  getRecords().forEach(r=>{
+    if(!r || typeof r.nickname !== "string" || !Number.isFinite(r.timeMs)) return;
+    const prev = bestByName.get(r.nickname);
+    if(!prev || r.timeMs < prev.timeMs) bestByName.set(r.nickname, r);
+  });
+  const sorted = [...bestByName.values()].sort((a,b)=>a.timeMs-b.timeMs).slice(0,100);
+  document.getElementById("rankingList").innerHTML = sorted.map((r,i)=>`<div class="rankRow"><div class="rankNum">${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div><div><div class="rankName">${escapeRecordHTML(r.nickname)}</div><div class="hint">개인 최고 기록</div></div><div class="rankTime">${formatRecordTime(r.timeMs)}</div></div>`).join("");
+  document.getElementById("emptyRanking").classList.toggle("hidden", sorted.length > 0);
+}
+function escapeRecordHTML(s){ return String(s).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch])); }
+
+document.querySelectorAll(".tab").forEach(b=>{
+  b.addEventListener("click",()=>{
+    if(b.dataset.mode==="record"){ openRecordTab(); return; }
+    if(b.dataset.mode==="ranking"){ openRankingTab(); return; }
+    showMainPanel("exam");
+    setRecordTabActive(b.dataset.mode);
+    setMode(b.dataset.mode);
+  });
+});
+document.getElementById("saveNicknameBtn").onclick=()=>{
+  const name = document.getElementById("nicknameInput").value.trim();
+  const err = document.getElementById("nicknameError");
+  if(name.length < 2 || name.length > 16 || /[<>]/.test(name)){
+    err.className = "feedback bad"; err.textContent = "닉네임은 2~16자로 입력해 주세요. < 또는 > 문자는 사용할 수 없습니다."; return;
+  }
+  localStorage.setItem(NICKNAME_KEY, name); updateNicknameUI();
 };
-function normalize(s){return (s||"").toLowerCase().normalize("NFKC").replace(/[()[\]{}·,.:;!?'"’“”\-–—_]/g,"").replace(/\s+/g,"").trim();}
-function matches(input, accepted){const a=normalize(input);return !!a && accepted.some(v=>normalize(v)===a);}
-function answerSet(song,key){return [song[key],...(song.aliases[key]||[])];}
-function current(){return songs[order[pos]];}
-function shuffled(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function videoId(url){
- try {const u=new URL(url); if(u.hostname.includes("youtu.be"))return u.pathname.slice(1).split("/")[0]; if(u.hostname.includes("youtube.com")||u.hostname.includes("youtube-nocookie.com")){if(u.pathname==="/watch")return u.searchParams.get("v"); const m=u.pathname.match(/\/(embed|shorts|live)\/([^/?]+)/);if(m)return m[2];}}catch(e){} return null;
-}
-function renderPlayer(){
- const song=current(), url=links[order[pos]], id=url&&videoId(url), area=$("playerArea");
- if(id){area.className="";area.innerHTML=`<iframe class="video" title="유튜브 음원 플레이어" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?playsinline=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;}
- else {area.className="no-video";area.innerHTML="아직 이 곡의 유튜브 링크가 등록되지 않았습니다.<br>아래 ‘음원 설정’을 열어 링크를 넣어 주세요.";}
- $("searchBtn").onclick=()=>window.open("https://www.youtube.com/results?search_query="+encodeURIComponent(song.search),"_blank","noopener");
-}
-function setMode(next){
- mode=next;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
- $("modeLabel").textContent=mode==="exam"?"EXAM MODE":mode==="wrong"?"WRONG ANSWERS":"MEMORY MODE";
- if(mode==="wrong"){order=shuffled([...wrongSet]);if(!order.length){order=shuffled(songs.map((_,i)=>i));alert("아직 오답이 없습니다. 전체 5곡으로 연습을 시작합니다.");}}
- else order=shuffled(songs.map((_,i)=>i));
- pos=0;score=0;correct=0;locked=false;revealed=false;wrongSet.clear();startQuestion();
-}
-function startQuestion(){
- const done=pos>=order.length;
- $("finish").classList.toggle("hidden",!done);$("answerFields").classList.toggle("hidden",done||mode==="study");$("answerActions").classList.toggle("hidden",done||mode==="study");$("nextActions").classList.add("hidden");
- $("feedback").className="feedback";$("feedback").textContent="";$("studyAnswer").className="feedback";$("studyAnswer").textContent="";
- if(done){$("counter").textContent="완료";$("progressBar").style.width="100%";$("finishText").textContent=`${correct} / ${order.length}곡을 완벽하게 맞혔습니다. 현재 점수 ${score}점입니다.`;return;}
- locked=false;revealed=false;["opera","aria","composer"].forEach(id=>$(id).value="");
- $("counter").textContent=`문제 ${pos+1} / ${order.length}`;$("progressBar").style.width=(pos/order.length*100)+"%";
- $("score").textContent=score;$("correctCount").textContent=correct;$("wrongCount").textContent=wrongSet.size;
- $("revealBtn").classList.toggle("hidden",mode!=="study");$("revealBtn").textContent="정답 보기";
- $("answerActions").classList.toggle("hidden",mode==="study");
- renderPlayer();
- if(mode==="study"){$("studyAnswer").className="feedback good";$("studyAnswer").innerHTML=`<strong>${current().opera}</strong> · ${current().aria} · ${current().composer}<div class="answerline">음원을 들으며 세 가지 이름을 소리 내어 말해 보세요.</div>`;$("nextActions").classList.remove("hidden");}
-}
-function grade(skipped=false){
- if(locked)return;const s=current();
- const results={
-  opera:matches($("opera").value,answerSet(s,"opera")),
-  aria:matches($("aria").value,answerSet(s,"aria")),
-  composer:matches($("composer").value,answerSet(s,"composer"))
- };
- const all=results.opera&&results.aria&&results.composer;
- locked=true;
- if(all&&!skipped){score+=1;correct++;wrongSet.delete(order[pos]);}else wrongSet.add(order[pos]);
- $("score").textContent=score;$("correctCount").textContent=correct;$("wrongCount").textContent=wrongSet.size;
- const f=$("feedback");f.className="feedback "+(all&&!skipped?"good":"bad");
- f.innerHTML=(all&&!skipped?"🎉 완벽합니다! 세 항목 모두 정답입니다.":"정답을 확인하고 다시 도전해 보세요.")+
- `<div class="answerline">오페라: ${s.opera} ${results.opera?"✓":"✗"}<br>아리아: ${s.aria} ${results.aria?"✓":"✗"}<br>작곡가: ${s.composer} ${results.composer?"✓":"✗"}</div>`;
- $("answerActions").classList.add("hidden");$("nextActions").classList.remove("hidden");$("nextBtn").textContent=pos===order.length-1?"결과 보기":"다음 문제 →";
-}
-function buildSettings(){
- $("settingsList").innerHTML=songs.map((s,i)=>`<div class="settingrow"><label>${i+1}. ${s.aria} · ${s.composer}</label><input type="url" data-link="${i}" value="${(links[i]||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;")}" placeholder="https://www.youtube.com/watch?v=..."></div>`).join("");
-}
-function renderSongList(){
- $("songList").innerHTML=songs.map((s,i)=>`<div class="songcard"><div class="songtitle">${i+1}. ${s.opera}</div><div class="songmeta">아리아: ${s.aria}<br>작곡가: ${s.composer}</div><button class="secondary" data-listen="${i}">음원 검색 ↗</button></div>`).join("");
- document.querySelectorAll("[data-listen]").forEach(b=>b.onclick=()=>window.open("https://www.youtube.com/results?search_query="+encodeURIComponent(songs[+b.dataset.listen].search),"_blank","noopener"));
-}
-document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));
-$("submitBtn").onclick=()=>grade(false);$("skipBtn").onclick=()=>grade(true);
-$("nextBtn").onclick=()=>{pos++;startQuestion();};
-$("restartBtn").onclick=()=>setMode("exam");$("wrongStartBtn").onclick=()=>setMode("wrong");
-$("revealBtn").onclick=()=>{const s=current();$("studyAnswer").className="feedback good";$("studyAnswer").innerHTML=`<strong>${s.opera}</strong> · ${s.aria} · ${s.composer}`;$("revealBtn").textContent="정답 공개됨";};
-$("saveLinks").onclick=()=>{document.querySelectorAll("[data-link]").forEach(el=>{const id=+el.dataset.link;const val=el.value.trim();if(videoId(val))links[id]=val;else if(!val)delete links[id];else alert(`${id+1}번 링크를 확인해 주세요. 유튜브 영상 주소를 넣어야 합니다.`);});localStorage.setItem("operaTrainerLinks",JSON.stringify(links));alert("음원 링크를 저장했습니다.");buildSettings();renderPlayer();};
-$("clearLinks").onclick=()=>{if(confirm("저장된 음원 링크를 모두 지울까요?")){links={};localStorage.removeItem("operaTrainerLinks");buildSettings();renderPlayer();}};
-document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!locked&&mode!=="study"&&["opera","aria","composer"].includes(document.activeElement.id))grade(false);});
-buildSettings();renderSongList();setMode("exam");
-</script>
-</body>
-</html>
+document.getElementById("startRecordBtn").onclick=startRecord;
+document.getElementById("changeNicknameBtn").onclick=()=>{
+  const current = getNickname();
+  const name = prompt("새 닉네임을 입력하세요.", current);
+  if(name === null) return;
+  const trimmed = name.trim();
+  if(trimmed.length < 2 || trimmed.length > 16 || /[<>]/.test(trimmed)){ alert("닉네임은 2~16자로 입력해 주세요."); return; }
+  localStorage.setItem(NICKNAME_KEY, trimmed); updateNicknameUI();
+};
+document.getElementById("recordSubmitBtn").onclick=submitRecordAnswer;
+["recordOpera","recordAria","recordComposer"].forEach(id=>document.getElementById(id).addEventListener("keydown",e=>{if(e.key==="Enter")submitRecordAnswer();}));
+document.getElementById("recordAgainBtn").onclick=()=>{openRecordTab(); if(getNickname()) startRecord();};
+document.getElementById("goRankingBtn").onclick=openRankingTab;
+document.getElementById("rankingStartBtn").onclick=openRecordTab;
+'''
+    marker = 'buildSettings();renderSongList();setMode("exam");'
+    if marker not in html:
+        raise RuntimeError("기존 JavaScript 초기화 코드를 찾지 못했습니다.")
+    html = html.replace(marker, js + '\n' + marker, 1)
+
+# Need ensure existing examPanel selector: inspect and fix panel display switch. Existing main likely has section id=examPanel? check
+if 'id="examPanel"' not in html:
+    # In original, main content may be the main section class=panel containing quiz; add id to first main panel.
+    html = re.sub(r'<section class="panel"', '<section id="examPanel" class="panel"', html, count=1)
+
+out_dir = Path("/mnt/data/opera_ear_trainer_timeattack")
+out_dir.mkdir(parents=True, exist_ok=True)
+out_html = out_dir / "index.html"
+out_html.write_text(html, encoding="utf-8")
+out_zip = Path("/mnt/data/opera_ear_trainer_timeattack.zip")
+with zipfile.ZipFile(out_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+    zf.write(out_html, arcname="index.html")
+
+print("완성된 파일을 만들었습니다.")
+print(f"HTML: {out_html} ({out_html.stat().st_size:,} bytes)")
+print(f"ZIP: {out_zip} ({out_zip.stat().st_size:,} bytes)")
