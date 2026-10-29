@@ -199,7 +199,7 @@ function submitRecordAnswer(){
     fb.innerHTML = `아직 정답이 아닙니다. 세 항목을 모두 맞혀야 다음 문제로 넘어갑니다.<div class="answerline">오페라 ${operaOK?"✓":"✗"} · 아리아 ${ariaOK?"✓":"✗"} · 작곡가 ${composerOK?"✓":"✗"}</div>`;
   }
 }
-function finishRecord()async function finishRecord(){
+async function finishRecord(){
   const elapsed = Math.round(performance.now() - recordStartedAt);
 
   if(recordTick){
