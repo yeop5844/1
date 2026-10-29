@@ -1,154 +1,57 @@
-from pathlib import Path
-import zipfile
-
-out_dir = Path("/mnt/data/opera_ear_lab_rebuilt")
-out_dir.mkdir(parents=True, exist_ok=True)
-html_path = out_dir / "index.html"
-
-html = r'''<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>음악 수행 준비</title>
+<title>오페라 귀 실험실</title>
 <style>
-:root{--bg:#0a1020;--panel:#111a2e;--panel2:#17223a;--line:#2a3857;--text:#f3f6ff;--muted:#a9b6d2;--accent:#8b9cff;--accent2:#c5ccff;--good:#5de0ae;--bad:#ff8295;--gold:#f7cc73}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#18264b 0,#0a1020 55%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55;min-height:100vh}
-button,input{font:inherit}button{cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:11px 15px;background:var(--panel2);color:var(--text);font-weight:700;transition:.15s}button:hover{border-color:var(--accent);transform:translateY(-1px)}button:disabled{opacity:.45;cursor:not-allowed;transform:none}.primary{background:linear-gradient(135deg,#8b9cff,#a7b0ff);color:#10162c;border:0}.secondary{background:transparent}.shell{width:min(980px,calc(100% - 28px));margin:0 auto;padding:30px 0 56px}.hero{padding:10px 0 20px}.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#8b9cff,#f2a8db);font-size:25px;box-shadow:0 8px 30px #8796ff35}.eyebrow{font-size:11px;letter-spacing:.18em;font-weight:900;color:var(--accent2)}h1{font-size:clamp(26px,5vw,42px);letter-spacing:-.04em;line-height:1.1;margin:4px 0}h2{font-size:23px;letter-spacing:-.03em;margin:0 0 8px}.sub{color:var(--muted);margin:8px 0 0}.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:20px 0}.tab{padding:12px 6px;color:var(--muted);background:#10182b}.tab.active{color:#10162c;background:var(--accent);border-color:transparent}.panel{background:linear-gradient(180deg,#131d33f5,#0f1729f5);border:1px solid var(--line);border-radius:22px;padding:clamp(17px,4vw,30px);box-shadow:0 18px 55px #0003}.hidden{display:none!important}.topline{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}.pill{font-size:12px;font-weight:800;color:var(--accent2);border:1px solid var(--line);border-radius:999px;padding:5px 10px}.lead{color:var(--muted);margin:0 0 18px}.player{border:1px solid var(--line);background:#0a1020;border-radius:16px;overflow:hidden;margin:16px 0}.video{width:100%;aspect-ratio:16/9;border:0;display:block}.video-placeholder{padding:24px;text-align:center;color:var(--muted)}.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.field label{display:block;color:var(--muted);font-size:13px;font-weight:700;margin-bottom:6px}.field input{width:100%;border:1px solid var(--line);border-radius:11px;background:#0a1120;color:var(--text);padding:12px;outline:none}.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #8b9cff22}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.feedback{margin-top:14px;min-height:24px;font-weight:700}.feedback.good{color:var(--good)}.feedback.bad{color:var(--bad)}.answerline{font-size:13px;color:var(--muted);font-weight:500;margin-top:5px}.progress{height:7px;border-radius:99px;background:#26324d;overflow:hidden;margin:0 0 14px}.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,#8b9cff,#5de0ae);transition:width .2s}.timer{font-size:clamp(38px,9vw,60px);font-weight:900;letter-spacing:-.05em;font-variant-numeric:tabular-nums;text-align:center;margin:8px 0}.stat{background:#0b1324;border:1px solid var(--line);border-radius:16px;padding:16px;margin:16px 0;text-align:center}.muted{color:var(--muted);font-size:13px}.notice{margin-top:18px;border:1px solid #66552a;background:#292312;color:#f6e4ae;padding:12px 14px;border-radius:13px;font-size:12px}.songlist{display:grid;gap:10px;margin-top:14px}.song{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;background:#0d1527;padding:12px}.songnum{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#263253;color:var(--accent2);font-weight:900}.songtitle{font-weight:800}.songmeta{color:var(--muted);font-size:13px}.rankrow{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;background:#0d1527;border:1px solid var(--line);border-radius:14px;padding:13px}.ranknum{font-weight:900;color:var(--gold)}.rankname{font-weight:800;overflow-wrap:anywhere}.ranktime{font-weight:900;font-variant-numeric:tabular-nums}.small{font-size:12px;color:var(--muted)}.footer{text-align:center;color:#7583a4;font-size:12px;margin-top:22px}
-@media(max-width:650px){.tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.tab{font-size:12px}.fields{grid-template-columns:1fr}.song{grid-template-columns:36px 1fr}.song button{grid-column:2}.panel{border-radius:18px}.topline{align-items:flex-start}}
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d35;--panel2:#1d2947;--line:#303d60;--text:#f3f6ff;--muted:#aab6d4;--accent:#9a8cff;--accent2:#63d6cf;--bad:#ff7d91;--good:#70e0a2}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#20264d 0,#0b1020 58%);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--text);background:var(--panel2)}button:hover{filter:brightness(1.13)}button.primary{background:linear-gradient(120deg,#7165e8,#4e7bdc);border:0;font-weight:750}button:disabled{opacity:.45;cursor:not-allowed}.wrap{width:min(1050px,calc(100% - 28px));margin:auto;padding:28px 0 50px}.hero{padding:22px 0 18px}.eyebrow{color:var(--accent2);font-size:.82rem;letter-spacing:.14em;font-weight:800}.hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.05;margin:10px 0}.hero p{color:var(--muted);margin:0;line-height:1.6}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.tab{background:#111a30}.tab.active{background:var(--accent);color:#101327;border-color:transparent;font-weight:800}.panel{background:linear-gradient(145deg,rgba(25,35,62,.97),rgba(17,25,46,.97));border:1px solid var(--line);border-radius:20px;padding:clamp(16px,3vw,26px);box-shadow:0 18px 50px #0003}.hidden{display:none!important}.muted{color:var(--muted)}.small{font-size:.9rem}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px}.track{border:1px solid var(--line);background:#10182d;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}.track h3{margin:0;font-size:1.08rem}.tag{display:inline-block;border-radius:999px;padding:4px 9px;background:#2a3156;color:#c9c4ff;font-size:.78rem;width:max-content}.track p{margin:0;color:var(--muted);line-height:1.5}.track a{color:#9fe8e3}.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:.9rem;color:var(--muted)}input,select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1327;color:var(--text)}.question{border:1px solid var(--line);border-radius:15px;padding:16px;margin:12px 0;background:#10182d}.question h3{margin:0 0 10px}.answergrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.feedback{margin-top:8px;font-weight:700}.correct{color:var(--good)}.wrong{color:var(--bad)}.timer{font-variant-numeric:tabular-nums;font-size:1.5rem;font-weight:850}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;margin-top:12px}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:.88rem}.notice{padding:12px 14px;background:#252747;border:1px solid #414675;border-radius:12px;color:#e0e4ff;line-height:1.55}.footer{margin-top:18px;color:var(--muted);font-size:.82rem;line-height:1.5}ol{padding-left:22px;line-height:1.8}
 </style>
-</head>
-<body>
-<div class="shell">
-  <header class="hero">
-    <div class="brand"><div class="logo">🎼</div><div><div class="eyebrow">LISTEN · IDENTIFY · MASTER</div><h1>음악 수행 준비</h1></div></div>
-    <p class="sub">음악을 듣고 오페라 · 아리아 · 작곡가를 맞혀 보세요.</p>
-  </header>
-
-  <nav class="tabs" aria-label="학습 모드">
-    <button class="tab active" data-mode="exam">실전 시험</button>
-    <button class="tab" data-mode="wrong">오답 반복</button>
-    <button class="tab" data-mode="study">암기 모드</button>
-    <button class="tab" data-mode="record">기록 측정</button>
-    <button class="tab" data-mode="ranking">순위</button>
-  </nav>
-
-  <main>
-    <section id="examPanel" class="panel">
-      <div class="topline"><span class="eyebrow" id="modeEyebrow">PRACTICE MODE</span><span class="pill" id="counter">문제 1 / 5</span></div>
-      <h2 id="quizTitle">실전 시험</h2>
-      <p class="lead" id="quizLead">음악을 듣고 세 항목을 모두 입력하세요.</p>
-      <div class="progress"><span id="progressBar"></span></div>
-      <div class="player" id="quizPlayer"><div class="video-placeholder">음원을 불러오는 중…</div></div>
-      <div class="fields">
-        <div class="field"><label for="operaInput">① 오페라 제목</label><input id="operaInput" autocomplete="off" placeholder="오페라 제목"></div>
-        <div class="field"><label for="ariaInput">② 아리아 곡명</label><input id="ariaInput" autocomplete="off" placeholder="아리아 곡명"></div>
-        <div class="field"><label for="composerInput">③ 작곡가</label><input id="composerInput" autocomplete="off" placeholder="작곡가"></div>
-      </div>
-      <div class="actions"><button class="primary" id="submitBtn">정답 제출</button><button class="secondary" id="skipBtn">다음 문제</button><button class="secondary hidden" id="restartBtn">다시 시작</button></div>
-      <div id="feedback" class="feedback" aria-live="polite"></div>
-    </section>
-
-    <section id="recordPanel" class="panel hidden">
-      <div class="topline"><span class="eyebrow">TIME ATTACK</span><span class="pill" id="recordCounter">준비 완료</span></div>
-      <h2>기록 측정</h2><p class="lead">5곡을 정해진 순서대로 모두 맞혀 최단 기록에 도전하세요.</p>
-      <div class="stat"><div class="muted">현재 측정 시간</div><div class="timer" id="recordTimer">00.00초</div></div>
-      <div id="nicknameGate">
-        <div class="field"><label for="nicknameInput">닉네임 (2~16자)</label><input id="nicknameInput" maxlength="16" placeholder="예: 오페라왕" autocomplete="nickname"></div>
-        <div class="actions"><button class="primary" id="saveNicknameBtn">닉네임 저장</button></div><div id="nicknameError" class="feedback"></div>
-      </div>
-      <div id="recordLobby" class="hidden"><p>참가자: <strong id="activeNickname"></strong></p><p class="muted">정답을 모두 맞혀야 기록이 등록됩니다. 오답을 입력해도 시간은 계속 흐릅니다.</p><div class="actions"><button class="primary" id="startRecordBtn">측정 시작</button><button class="secondary" id="changeNicknameBtn">닉네임 변경</button></div></div>
-      <div id="recordQuiz" class="hidden">
-        <div class="progress"><span id="recordProgressBar"></span></div><div class="player" id="recordPlayerArea"><div class="video-placeholder">음원 준비 중…</div></div>
-        <div class="fields">
-          <div class="field"><label for="recordOpera">① 오페라 제목</label><input id="recordOpera" placeholder="오페라 제목" autocomplete="off"></div>
-          <div class="field"><label for="recordAria">② 아리아 곡명</label><input id="recordAria" placeholder="아리아 곡명" autocomplete="off"></div>
-          <div class="field"><label for="recordComposer">③ 작곡가</label><input id="recordComposer" placeholder="작곡가" autocomplete="off"></div>
-        </div>
-        <div class="actions"><button class="primary" id="recordSubmitBtn">정답 제출</button></div><div id="recordFeedback" class="feedback"></div>
-      </div>
-      <div id="recordFinished" class="hidden"><h2>완주 성공!</h2><p>5곡을 모두 맞혔습니다.</p><div class="stat"><div class="muted">최종 기록</div><div class="timer" id="finalRecordTime">00.00초</div></div><p id="recordFinishNote" class="muted"></p><div class="actions"><button class="primary" id="recordAgainBtn">다시 도전</button><button class="secondary" id="goRankingBtn">순위 확인</button></div></div>
-      <div class="notice">온라인 순위는 Supabase 연결이 필요합니다. 기록은 클라이언트에서 제출되므로 이 버전은 기능 테스트용이며, 완전한 부정 방지 기능은 포함하지 않습니다.</div>
-    </section>
-
-    <section id="rankingPanel" class="panel hidden">
-      <div class="topline"><span class="eyebrow">LEADERBOARD</span><span class="pill">개인 최고 기록</span></div>
-      <h2>🏆 온라인 순위</h2><p class="lead">닉네임별 가장 빠른 기록을 표시합니다.</p>
-      <div id="rankingList" class="songlist"></div><p id="emptyRanking" class="muted">아직 등록된 기록이 없습니다.</p><div id="rankingError" class="feedback"></div>
-      <div class="actions"><button class="primary" id="refreshRankingBtn">순위 새로고침</button><button class="secondary" id="rankingStartBtn">기록 측정</button></div>
-    </section>
-
-    <section class="panel" id="repertoirePanel" style="margin-top:16px">
-      <div class="topline"><span class="eyebrow">REPERTOIRE</span><span class="pill">5곡</span></div><h2>수록곡</h2><p class="lead">곡을 눌러 해당 음원을 열 수 있습니다.</p><div id="songList" class="songlist"></div>
-    </section>
-  </main>
-  <div class="footer">오페라 귀 실험실 · 학습용 웹사이트</div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body><main class="wrap">
+<header class="hero"><div class="eyebrow">LISTEN · IDENTIFY · REMEMBER</div><h1>오페라 귀 실험실</h1><p>귀로 듣고 작품과 작곡가를 맞혀 보세요. 반복 연습부터 기록 측정과 온라인 순위까지!</p></header>
+<nav class="tabs" aria-label="메뉴"><button class="tab active" data-tab="practice">실전 시험</button><button class="tab" data-tab="wrong">오답 반복</button><button class="tab" data-tab="memorize">암기 모드</button><button class="tab" data-tab="record">기록 측정</button><button class="tab" data-tab="ranking">순위</button></nav>
+<section id="practice" class="panel"><div class="row between"><div><h2>실전 시험</h2><p class="muted">작품의 제목, 아리아, 작곡가를 확인해 보세요.</p></div><button class="primary" id="startPractice">시험 시작 / 새로 섞기</button></div><div id="practiceQuiz"></div><div class="row"><button id="checkPractice" class="primary">답안 채점</button><button id="resetPractice">초기화</button></div><div id="practiceResult" class="feedback"></div></section>
+<section id="wrong" class="panel hidden"><h2>오답 반복</h2><p class="muted">실전 시험에서 틀린 문항만 다시 풀 수 있어요.</p><div id="wrongQuiz"></div><div class="row"><button class="primary" id="checkWrong">오답 채점</button><button id="resetWrong">다시 불러오기</button></div><div id="wrongResult" class="feedback"></div></section>
+<section id="memorize" class="panel hidden"><h2>암기 모드</h2><p class="muted">작품 정보를 확인하고 YouTube에서 해당 곡을 들어 보세요.</p><div id="studyList" class="grid"></div></section>
+<section id="record" class="panel hidden"><div class="row between"><div><h2>기록 측정</h2><p class="muted">닉네임을 입력하고 시작하세요. 5곡 모두 정답이면 기록이 제출됩니다.</p></div><div class="timer" id="clock">00:00.000</div></div><div class="notice">기록은 문제를 시작한 순간부터 5개 문항을 모두 정확히 맞힐 때까지 측정돼요. 한 문항이라도 틀리면 다시 채점할 수 있어요.</div><div class="field"><label for="nickname">닉네임 (2~16자)</label><input id="nickname" maxlength="16" minlength="2" placeholder="닉네임 입력" autocomplete="nickname"></div><div class="row"><button class="primary" id="startRecord">기록 측정 시작</button><button id="checkRecord">답안 채점 / 기록 제출</button><button id="resetRecord">처음부터 다시</button></div><div id="recordQuiz"></div><div id="recordResult" class="feedback"></div></section>
+<section id="ranking" class="panel hidden"><div class="row between"><div><h2>온라인 순위</h2><p class="muted">닉네임별 최고 기록 기준 · 시간이 짧을수록 상위</p></div><button class="primary" id="refreshRanking">순위 새로고침</button></div><div id="rankingStatus" class="notice">순위를 불러오는 중…</div><div class="tablewrap"><table><thead><tr><th>순위</th><th>닉네임</th><th>최고 기록</th><th>등록일</th></tr></thead><tbody id="rankingBody"></tbody></table></div></section>
+<p class="footer">온라인 기록은 Supabase에 저장됩니다. 기록이 보이지 않으면 인터넷 연결, Supabase 키, 테이블의 RLS 정책을 확인해 주세요. 공개용 Publishable key만 사용하고 Secret/service_role 키는 웹사이트에 넣지 마세요.</p>
+</main>
 <script>
-// ===== 여기 두 값만 본인 Supabase 프로젝트 값으로 바꾸세요 =====
+// Supabase project connection
 const SUPABASE_URL = "https://nzjpzvnjsdwoxcuysmvb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_OXzl0hTkWyCZDuvXPiZgyw_Ye9tZy16";
-// ================================================================
-const SUPABASE_CONFIGURED =
-  SUPABASE_URL.startsWith("https://") &&
-  SUPABASE_URL.endsWith(".supabase.co") &&
-  SUPABASE_KEY.startsWith("sb_publishable_") &&
-  !SUPABASE_URL.includes("여기에_") &&
-  !SUPABASE_KEY.includes("여기에_");
-const db = SUPABASE_CONFIGURED && window.supabase
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-  : null;
-
+const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 const songs = [
-  {opera:"투란도트", aria:"네순도르마", composer:"푸치니", operaAnswers:["투란도트","turandot"], ariaAnswers:["네순도르마","공주는 잠 못 이루고","nessun dorma"], composerAnswers:["푸치니","푸치니","puccini"], url:"https://youtu.be/cWc7vYjgnTs?si=LpVbg6eZ6CLRqvX4"},
-  {opera:"카르멘", aria:"투우사의 노래", composer:"비제", operaAnswers:["카르멘","carmen"], ariaAnswers:["투우사의 노래","투우사 노래","토레아도르","toreador song"], composerAnswers:["비제","bizet"], url:"https://youtu.be/e5qmSEvDEGs?si=xlqDIjFO4_2n5LmV"},
-  {opera:"카르멘", aria:"하바네라", composer:"비제", operaAnswers:["카르멘","carmen"], ariaAnswers:["하바네라","habanera"], composerAnswers:["비제","bizet"], url:"https://youtu.be/K2snTkaD64U?si=AfEL5T1JuxXW4pbK"},
-  {opera:"리골레토", aria:"여자의 마음", composer:"베르디", operaAnswers:["리골레토","rigoletto"], ariaAnswers:["여자의 마음","여자는 변덕스러워","la donna e mobile","la donna è mobile"], composerAnswers:["베르디","verdi"], url:"https://youtu.be/a8-vZJNY10k?si=uhGoJUFB_LiMe7Ku"},
-  {opera:"마술피리", aria:"밤의 여왕 아리아", composer:"모차르트", operaAnswers:["마술피리","마적","die zauberflote","die zauberflöte","magic flute"], ariaAnswers:["밤의 여왕 아리아","밤의 여왕","queen of the night"], composerAnswers:["모차르트","mozart"], url:"https://youtu.be/s7vJcUogrEI?si=qyOmzq9QRsYqQojG"}
+ {opera:"투란도트",aria:"네순도르마 (공주는 잠 못 이루고)",composer:"푸치니",url:"https://youtu.be/cWc7vYjgnTs?si=LpVbg6eZ6CLRqvX4"},
+ {opera:"카르멘",aria:"투우사의 노래",composer:"비제",url:"https://youtu.be/e5qmSEvDEGs?si=xlqDIjFO4_2n5LmV"},
+ {opera:"카르멘",aria:"하바네라",composer:"비제",url:"https://youtu.be/K2snTkaD64U?si=AfEL5T1JuxXW4pbK"},
+ {opera:"리골레토",aria:"여자의 마음",composer:"베르디",url:"https://youtu.be/a8-vZJNY10k?si=uhGoJUFB_LiMe7Ku"},
+ {opera:"마술피리",aria:"밤의 여왕 아리아",composer:"모차르트",url:"https://youtu.be/s7vJcUogrEI?si=qyOmzq9QRsYqQojG"}
 ];
-const $ = id => document.getElementById(id);
-const norm = s => String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[’']/g,"").replace(/[^a-z0-9가-힣]/g,"");
-function matches(value, answers){const v=norm(value);return !!v && answers.some(a=>norm(a)===v);}
-function videoId(url){const m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
-function playerHTML(song){const id=videoId(song.url);return id?`<iframe class="video" title="${song.opera} ${song.aria}" src="https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`:`<div class="video-placeholder">음원을 열 수 없습니다.</div>`;}
-function renderSongList(){$("songList").innerHTML=songs.map((s,i)=>`<div class="song"><div class="songnum">${i+1}</div><div><div class="songtitle">${s.opera} — ${s.aria}</div><div class="songmeta">작곡가: ${s.composer}</div></div><button class="secondary" data-song="${i}">음원 열기 ↗</button></div>`).join("");document.querySelectorAll("[data-song]").forEach(b=>b.onclick=()=>window.open(songs[Number(b.dataset.song)].url,"_blank","noopener,noreferrer"));}
-let mode="exam", quizOrder=[0,1,2,3,4], quizPos=0, wrongSet=new Set(), studyMode=false;
-function setPanel(which){$("examPanel").classList.toggle("hidden",which!=="exam"&&which!=="wrong"&&which!=="study");$("recordPanel").classList.toggle("hidden",which!=="record");$("rankingPanel").classList.toggle("hidden",which!=="ranking");$("repertoirePanel").classList.toggle("hidden",which==="record"||which==="ranking");document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.mode===which));}
-function startQuiz(which="exam"){mode=which;quizOrder=which==="wrong"?[...wrongSet]:[0,1,2,3,4];if(which==="wrong"&&!quizOrder.length){$("feedback").className="feedback good";$("feedback").textContent="현재 오답이 없습니다. 실전 시험을 먼저 풀어 보세요.";quizOrder=[0,1,2,3,4];}quizPos=0;$("quizTitle").textContent=which==="study"?"암기 모드":which==="wrong"?"오답 반복":"실전 시험";$("quizLead").textContent=which==="study"?"정답을 확인하며 곡을 익혀 보세요.":which==="wrong"?"이전에 틀린 곡을 다시 풀어 보세요.":"음악을 듣고 세 항목을 모두 입력하세요."; $("submitBtn").classList.toggle("hidden",which==="study");$("skipBtn").classList.toggle("hidden",which==="study");$("restartBtn").classList.add("hidden");$("feedback").textContent="";renderQuizQuestion();}
-function renderQuizQuestion(){if(quizPos>=quizOrder.length){$("counter").textContent="완료";$("quizPlayer").innerHTML='<div class="video-placeholder">이번 세트를 완료했습니다.</div>';$("fields");$("submitBtn").classList.add("hidden");$("skipBtn").classList.add("hidden");$("restartBtn").classList.remove("hidden");$("progressBar").style.width="100%";$("feedback").className="feedback good";$("feedback").textContent="완료했습니다! 다시 시작하거나 다른 모드를 선택하세요.";return;}const idx=quizOrder[quizPos],s=songs[idx];$("counter").textContent=`문제 ${quizPos+1} / ${quizOrder.length}`;$("progressBar").style.width=(quizPos/quizOrder.length*100)+"%";$("quizPlayer").innerHTML=playerHTML(s);["operaInput","ariaInput","composerInput"].forEach(id=>$(id).value="");$("feedback").className="feedback";$("feedback").textContent="";if(mode==="study"){$("operaInput").value=s.opera;$("ariaInput").value=s.aria;$("composerInput").value=s.composer;$("feedback").className="feedback good";$("feedback").textContent=`정답: ${s.opera} · ${s.aria} · ${s.composer}`;}}
-function submitQuiz(){if(quizPos>=quizOrder.length)return;const idx=quizOrder[quizPos],s=songs[idx];const a=matches($("operaInput").value,s.operaAnswers),b=matches($("ariaInput").value,s.ariaAnswers),c=matches($("composerInput").value,s.composerAnswers);if(a&&b&&c){wrongSet.delete(idx);$("feedback").className="feedback good";$("feedback").textContent="정답입니다!";quizPos++;setTimeout(renderQuizQuestion,450);}else{wrongSet.add(idx);$("feedback").className="feedback bad";$("feedback").innerHTML=`아직 정답이 아닙니다.<div class="answerline">오페라 ${a?"✓":"✗"} · 아리아 ${b?"✓":"✗"} · 작곡가 ${c?"✓":"✗"}</div>`;}}
-function nextQuiz(){if(quizPos<quizOrder.length){wrongSet.add(quizOrder[quizPos]);quizPos++;renderQuizQuestion();}}
-document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{const m=b.dataset.mode;if(["exam","wrong","study"].includes(m)){setPanel("exam");startQuiz(m);}else if(m==="record"){setPanel("record");resetRecord();}else{setPanel("ranking");renderOnlineRanking();}}));
-$("submitBtn").onclick=submitQuiz;$("skipBtn").onclick=nextQuiz;$("restartBtn").onclick=()=>startQuiz(mode);
-["operaInput","ariaInput","composerInput"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")submitQuiz();}));
-
-const NICK_KEY="operaEarLabNickname";
-let recordPos=0, recordStartedAt=null, recordInterval=null, recordBusy=false;
-function nickname(){return localStorage.getItem(NICK_KEY)||"";}
-function updateNickname(){const name=nickname();$("nicknameGate").classList.toggle("hidden",!!name);$("recordLobby").classList.toggle("hidden",!name);$("activeNickname").textContent=name;$("nicknameError").textContent="";}
-function resetRecord(){if(recordInterval){clearInterval(recordInterval);recordInterval=null;}recordPos=0;recordStartedAt=null;recordBusy=false;$("recordTimer").textContent="00.00초";$("recordCounter").textContent="준비 완료";["recordQuiz","recordFinished"].forEach(id=>$(id).classList.add("hidden"));updateNickname();}
-$("saveNicknameBtn").onclick=()=>{const name=$("nicknameInput").value.trim();if(name.length<2||name.length>16||/[<>]/.test(name)){$("nicknameError").className="feedback bad";$("nicknameError").textContent="닉네임은 2~16자로 입력해 주세요.";return;}localStorage.setItem(NICK_KEY,name);updateNickname();};
-$("changeNicknameBtn").onclick=()=>{const name=prompt("새 닉네임을 입력하세요.",nickname());if(name===null)return;const v=name.trim();if(v.length<2||v.length>16||/[<>]/.test(v)){alert("닉네임은 2~16자로 입력해 주세요.");return;}localStorage.setItem(NICK_KEY,v);updateNickname();};
-function updateTimer(){$("recordTimer").textContent=((performance.now()-recordStartedAt)/1000).toFixed(2)+"초";}
-function renderRecordQuestion(){const s=songs[recordPos];$("recordCounter").textContent=`문제 ${recordPos+1} / 5`;$("recordProgressBar").style.width=(recordPos/5*100)+"%";$("recordPlayerArea").innerHTML=playerHTML(s);["recordOpera","recordAria","recordComposer"].forEach(id=>$(id).value="");$("recordFeedback").textContent="";$("recordFeedback").className="feedback";$("recordOpera").focus();}
-$("startRecordBtn").onclick=()=>{if(!nickname())return;recordPos=0;recordStartedAt=performance.now();$("recordLobby").classList.add("hidden");$("recordFinished").classList.add("hidden");$("recordQuiz").classList.remove("hidden");if(recordInterval)clearInterval(recordInterval);renderRecordQuestion();recordInterval=setInterval(updateTimer,50);};
-$("recordSubmitBtn").onclick=async()=>{if(recordStartedAt===null||recordBusy)return;const s=songs[recordPos];const a=matches($("recordOpera").value,s.operaAnswers),b=matches($("recordAria").value,s.ariaAnswers),c=matches($("recordComposer").value,s.composerAnswers);if(!(a&&b&&c)){$("recordFeedback").className="feedback bad";$("recordFeedback").innerHTML=`아직 정답이 아닙니다.<div class="answerline">오페라 ${a?"✓":"✗"} · 아리아 ${b?"✓":"✗"} · 작곡가 ${c?"✓":"✗"}</div>`;return;}recordPos++;if(recordPos<5){renderRecordQuestion();return;}recordBusy=true;const elapsed=Math.round(performance.now()-recordStartedAt);clearInterval(recordInterval);recordInterval=null;recordStartedAt=null;$("recordQuiz").classList.add("hidden");$("recordFinished").classList.remove("hidden");$("recordCounter").textContent="완주";$("recordProgressBar").style.width="100%";$("recordTimer").textContent=(elapsed/1000).toFixed(2)+"초";$("finalRecordTime").textContent=(elapsed/1000).toFixed(2)+"초";if(!db){$("recordFinishNote").textContent="Supabase가 아직 연결되지 않았습니다. index.html의 URL과 공개용 키를 확인해 주세요.";return;}$("recordFinishNote").textContent="온라인 순위에 기록을 저장하는 중…";const {error}=await db.from("opera_records").insert({nickname:nickname(),time_ms:elapsed});if(error){console.error(error);$("recordFinishNote").textContent="기록 저장 실패: "+error.message;return;}$("recordFinishNote").textContent="온라인 순위에 등록되었습니다!";};
-["recordOpera","recordAria","recordComposer"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")$("recordSubmitBtn").click();}));
-$("recordAgainBtn").onclick=()=>{resetRecord();if(nickname())$("startRecordBtn").click();};$("goRankingBtn").onclick=()=>{setPanel("ranking");renderOnlineRanking();};$("rankingStartBtn").onclick=()=>{setPanel("record");resetRecord();};$("refreshRankingBtn").onclick=renderOnlineRanking;
-async function renderOnlineRanking(){const list=$("rankingList"),empty=$("emptyRanking"),err=$("rankingError");list.replaceChildren();err.textContent="";if(!db){empty.classList.remove("hidden");empty.textContent="Supabase 연결값을 입력하면 온라인 순위가 표시됩니다.";return;}const {data,error}=await db.from("opera_records").select("nickname,time_ms,created_at").order("time_ms",{ascending:true}).limit(1000);if(error){empty.classList.remove("hidden");err.className="feedback bad";err.textContent="순위를 불러오지 못했습니다: "+error.message;return;}const best=new Map();for(const r of data||[]){if(typeof r.nickname!=="string"||!Number.isFinite(r.time_ms))continue;const old=best.get(r.nickname);if(!old||r.time_ms<old.time_ms)best.set(r.nickname,r);}const rows=[...best.values()].sort((a,b)=>a.time_ms-b.time_ms);empty.classList.toggle("hidden",rows.length>0);rows.forEach((r,i)=>{const row=document.createElement("div");row.className="rankrow";const rank=document.createElement("div");rank.className="ranknum";rank.textContent=i===0?"🥇":i===1?"🥈":i===2?"🥉":String(i+1);const name=document.createElement("div");name.className="rankname";name.textContent=r.nickname;const time=document.createElement("div");time.className="ranktime";time.textContent=(r.time_ms/1000).toFixed(2)+"초";row.append(rank,name,time);list.append(row);});}
-renderSongList();startQuiz("exam");resetRecord();
-</script>
-</body>
-</html>
-'''
-
-html_path.write_text(html, encoding="utf-8")
-zip_path = Path("/mnt/data/opera_ear_lab_rebuilt.zip")
-with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
-    z.write(html_path, arcname="index.html")
-
-print("완성했습니다.")
-print(f"HTML 파일: {html_path} ({html_path.stat().st_size:,} bytes)")
-print(f"ZIP 파일: {zip_path} ({zip_path.stat().st_size:,} bytes)")
+const $=id=>document.getElementById(id); let wrongIds=[]; let recordStart=null; let timerInterval=null; let recordSubmitted=false;
+const unique=(key)=>[...new Set(songs.map(s=>s[key]))];
+function shuffled(arr){return [...arr].sort(()=>Math.random()-.5)}
+function optionsFor(key,answer){return shuffled([...new Set([...unique(key),answer])])}
+function buildQuiz(containerId,ids){const host=$(containerId);host.innerHTML='';ids.forEach((songIndex,pos)=>{const s=songs[songIndex];const q=document.createElement('article');q.className='question';q.dataset.song=String(songIndex);q.innerHTML=`<h3>문항 ${pos+1}</h3><p class="muted">곡을 듣고 아래 정보를 고르세요. <a href="${s.url}" target="_blank" rel="noopener">곡 듣기 ↗</a></p><div class="answergrid"><div class="field"><label>오페라 작품</label><select data-key="opera"><option value="">선택하세요</option>${optionsFor('opera',s.opera).map(v=>`<option>${v}</option>`).join('')}</select></div><div class="field"><label>아리아 / 곡 제목</label><select data-key="aria"><option value="">선택하세요</option>${optionsFor('aria',s.aria).map(v=>`<option>${v}</option>`).join('')}</select></div><div class="field"><label>작곡가</label><select data-key="composer"><option value="">선택하세요</option>${optionsFor('composer',s.composer).map(v=>`<option>${v}</option>`).join('')}</select></div></div><div class="feedback"></div>`;host.appendChild(q)})}
+function checkQuiz(containerId,resultId,onlyCorrect=false){const qs=[...$(containerId).querySelectorAll('.question')];let score=0;const wrong=[];qs.forEach(q=>{const s=songs[Number(q.dataset.song)];let ok=true;q.querySelectorAll('select').forEach(sel=>{const right=s[sel.dataset.key];if(sel.value!==right)ok=false});const fb=q.querySelector('.feedback');fb.textContent=ok?'정답!':'아직 오답이 있어요.';fb.className='feedback '+(ok?'correct':'wrong');if(ok)score++;else wrong.push(Number(q.dataset.song))});$(resultId).textContent=`${score} / ${qs.length}문항 정답`;return {score,total:qs.length,wrong}}
+function renderStudy(){ $('studyList').innerHTML=songs.map((s,i)=>`<article class="track"><span class="tag">작품 ${i+1}</span><h3>${s.opera}</h3><p><b>${s.aria}</b></p><p>작곡가: ${s.composer}</p><a href="${s.url}" target="_blank" rel="noopener">YouTube에서 듣기 ↗</a></article>`).join('') }
+function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['practice','wrong','memorize','record','ranking'].forEach(id=>$(id).classList.toggle('hidden',id!==tab));if(tab==='ranking')loadRanking()}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+function loadPractice(){buildQuiz('practiceQuiz',shuffled([0,1,2,3,4]));$('practiceResult').textContent='';}
+$('startPractice').onclick=loadPractice;$('resetPractice').onclick=loadPractice;
+$('checkPractice').onclick=()=>{const r=checkQuiz('practiceQuiz','practiceResult');wrongIds=r.wrong;buildQuiz('wrongQuiz',wrongIds);$('wrongResult').textContent=wrongIds.length?`다시 풀 문항 ${wrongIds.length}개를 오답 반복 탭에 준비했어요.`:'모든 문항 정답!';};
+$('checkWrong').onclick=()=>{const r=checkQuiz('wrongQuiz','wrongResult');wrongIds=r.wrong};$('resetWrong').onclick=()=>buildQuiz('wrongQuiz',wrongIds);
+function fmt(ms){const m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000),mill=ms%1000;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(mill).padStart(3,'0')}`}
+function stopTimer(){if(timerInterval)clearInterval(timerInterval);timerInterval=null}
+function resetRecord(){stopTimer();recordStart=null;recordSubmitted=false;$('clock').textContent='00:00.000';$('recordResult').textContent='';$('nickname').disabled=false;$('startRecord').disabled=false;buildQuiz('recordQuiz',shuffled([0,1,2,3,4]))}
+$('startRecord').onclick=()=>{const n=$('nickname').value.trim();if(n.length<2||n.length>16){$('recordResult').textContent='닉네임은 2~16자로 입력해 주세요.';return}if(recordStart!==null){$('recordResult').textContent='이미 측정 중이에요. 답안을 입력해 주세요.';return}recordStart=performance.now();recordSubmitted=false;$('nickname').disabled=true;$('startRecord').disabled=true;timerInterval=setInterval(()=>$('clock').textContent=fmt(performance.now()-recordStart),37);$('recordResult').textContent='측정 중! 5문항을 모두 맞히면 기록이 제출돼요.'};
+$('checkRecord').onclick=async()=>{if(recordStart===null){$('recordResult').textContent='먼저 닉네임을 입력하고 기록 측정 시작을 눌러 주세요.';return}if(recordSubmitted)return;const r=checkQuiz('recordQuiz','recordResult');if(r.score!==r.total){$('recordResult').textContent=`${r.score}/${r.total} 정답. 틀린 답을 고친 뒤 다시 채점해 주세요.`;return}const elapsed=Math.round(performance.now()-recordStart);stopTimer();$('clock').textContent=fmt(elapsed);if(!db){$('recordResult').textContent='Supabase 연결을 불러오지 못했어요. 인터넷과 연결 코드를 확인해 주세요.';return} $('recordResult').textContent='정답 완료! 기록을 저장하는 중…';const {error}=await db.from('opera_records').insert({nickname:$('nickname').value.trim(),time_ms:elapsed});if(error){$('recordResult').textContent='저장 실패: '+error.message+' (Supabase 테이블과 정책을 확인해 주세요.)';return}recordSubmitted=true;$('recordResult').textContent=`기록 저장 완료! ${fmt(elapsed)} · 순위 탭에서 확인해 보세요.`;$('startRecord').disabled=false;};
+$('resetRecord').onclick=resetRecord;
+async function loadRanking(){const status=$('rankingStatus'),body=$('rankingBody');body.innerHTML='';if(!db){status.textContent='Supabase 클라이언트를 불러오지 못했어요.';return}status.textContent='순위를 불러오는 중…';const {data,error}=await db.from('opera_records').select('nickname,time_ms,created_at').order('time_ms',{ascending:true}).limit(500);if(error){status.textContent='순위를 불러오지 못했어요: '+error.message;return}const best=new Map();for(const row of (data||[])){const old=best.get(row.nickname);if(!old||row.time_ms<old.time_ms)best.set(row.nickname,row)}const rows=[...best.values()].sort((a,b)=>a.time_ms-b.time_ms).slice(0,100);if(!rows.length){status.textContent='아직 등록된 기록이 없어요. 첫 기록을 남겨 보세요!';return}status.textContent=`${rows.length}명의 닉네임별 최고 기록`;rows.forEach((r,i)=>{const tr=document.createElement('tr');const date=new Date(r.created_at);tr.innerHTML=`<td>${i+1}</td><td></td><td>${fmt(r.time_ms)}</td><td>${date.toLocaleDateString('ko-KR')}</td>`;tr.children[1].textContent=r.nickname;body.appendChild(tr)})}
+$('refreshRanking').onclick=loadRanking;
+renderStudy();loadPractice();buildQuiz('wrongQuiz',[]);buildQuiz('recordQuiz',shuffled([0,1,2,3,4]));
+</script></body></html>
