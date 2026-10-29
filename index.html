@@ -235,6 +235,55 @@ async function finishRecord(){
 
   note.textContent = "기록이 온라인 순위표에 등록되었습니다!";
   await renderOnlineRanking();
+}async function renderOnlineRanking() {
+  const { data, error } = await db
+    .from("opera_records")
+    .select("nickname, time_ms, created_at")
+    .order("time_ms", { ascending: true });
+
+  if (error) {
+    console.error("순위 조회 실패:", error.message);
+    return;
+  }
+
+  const bestByName = new Map();
+
+  for (const record of data) {
+    const previous = bestByName.get(record.nickname);
+
+    if (!previous || record.time_ms < previous.time_ms) {
+      bestByName.set(record.nickname, record);
+    }
+  }
+
+  const ranking = [...bestByName.values()]
+    .sort((a, b) => a.time_ms - b.time_ms);
+
+  const list = document.getElementById("rankingList");
+  list.replaceChildren();
+
+  ranking.forEach((record, index) => {
+    const row = document.createElement("div");
+    row.className = "rankRow";
+
+    const rank = document.createElement("div");
+    rank.className = "rankNum";
+    rank.textContent = index + 1;
+
+    const name = document.createElement("div");
+    name.className = "rankName";
+    name.textContent = record.nickname;
+
+    const time = document.createElement("div");
+    time.className = "rankTime";
+    time.textContent = (record.time_ms / 1000).toFixed(2) + "초";
+
+    row.append(rank, name, time);
+    list.appendChild(row);
+  });
+
+  document.getElementById("emptyRanking")
+    .classList.toggle("hidden", ranking.length > 0);
 }
 function renderRanking(){
   const bestByName = new Map();
