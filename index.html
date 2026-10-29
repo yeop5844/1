@@ -199,22 +199,42 @@ function submitRecordAnswer(){
     fb.innerHTML = `아직 정답이 아닙니다. 세 항목을 모두 맞혀야 다음 문제로 넘어갑니다.<div class="answerline">오페라 ${operaOK?"✓":"✗"} · 아리아 ${ariaOK?"✓":"✗"} · 작곡가 ${composerOK?"✓":"✗"}</div>`;
   }
 }
-function finishRecord(){
+function finishRecord()async function finishRecord(){
   const elapsed = Math.round(performance.now() - recordStartedAt);
-  if(recordTick){ clearInterval(recordTick); recordTick = null; }
+
+  if(recordTick){
+    clearInterval(recordTick);
+    recordTick = null;
+  }
+
   recordStartedAt = null;
+
   document.getElementById("recordQuiz").classList.add("hidden");
   document.getElementById("recordFinished").classList.remove("hidden");
   document.getElementById("recordCounter").textContent = "완주";
   document.getElementById("recordProgressBar").style.width = "100%";
   document.getElementById("recordTimer").textContent = formatRecordTime(elapsed);
   document.getElementById("finalRecordTime").textContent = formatRecordTime(elapsed);
+
   const nickname = getNickname();
-  const records = getRecords();
-  records.push({nickname, timeMs: elapsed, date: new Date().toISOString()});
-  saveRecords(records);
-  const personalBest = Math.min(...records.filter(r=>r.nickname === nickname).map(r=>r.timeMs));
-  document.getElementById("recordFinishNote").textContent = personalBest === elapsed ? "개인 최고 기록입니다! 순위 탭에서 확인할 수 있습니다." : `개인 최고 기록은 ${formatRecordTime(personalBest)}입니다. 이번 기록도 저장되었습니다.`;
+  const note = document.getElementById("recordFinishNote");
+  note.textContent = "기록을 서버에 저장하는 중...";
+
+  const { error } = await db
+    .from("opera_records")
+    .insert({
+      nickname: nickname,
+      time_ms: elapsed
+    });
+
+  if(error){
+    console.error("기록 저장 실패:", error.message);
+    note.textContent = "기록 저장에 실패했습니다. 인터넷 연결과 Supabase 설정을 확인해 주세요.";
+    return;
+  }
+
+  note.textContent = "기록이 온라인 순위표에 등록되었습니다!";
+  await renderOnlineRanking();
 }
 function renderRanking(){
   const bestByName = new Map();
